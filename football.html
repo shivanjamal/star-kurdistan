@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ستێرێن تەپاپێ - Football Stars</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; -webkit-user-select: none; user-select: none; }
+        body { font-family: 'Noto Kufi Arabic', 'Segoe UI', sans-serif; background: #08080a; color: white; padding: 20px; }
+        
+        header { 
+            max-width: 1100px; margin: 0 auto 30px; display: flex; 
+            justify-content: space-between; align-items: center; 
+            border-bottom: 2px solid #e60303; padding-bottom: 20px; 
+        }
+        
+        .logo-container { display: flex; align-items: center; gap: 15px; }
+        .header-logo { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #e60303; }
+        
+        .back-btn { text-decoration: none; color: white; background: #e60303; padding: 10px 20px; border-radius: 12px; font-weight: bold; }
+
+        .random-container {
+            max-width: 800px; margin: 0 auto 50px;
+            background: rgba(230, 3, 3, 0.05); border: 2px dashed #e60303; 
+            border-radius: 25px; padding: 30px; text-align: center;
+        }
+
+        #result-box {
+            background: #151518; border: 1px solid #333; padding: 20px; margin: 20px auto; 
+            border-radius: 15px; font-size: 1.4rem; font-weight: bold; min-height: 70px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        #result-box a { color: #e60303; text-decoration: none; border-bottom: 2px solid #e60303; }
+
+        .random-btn { background: #e60303; color: white; border: none; padding: 15px 30px; border-radius: 50px; cursor: pointer; font-weight: bold; }
+
+        /* Search Bar Style */
+        .search-container { text-align: center; margin-bottom: 30px; position: relative; z-index: 10; }
+        #searchInput {
+            padding: 15px; width: 90%; max-width: 400px;
+            border-radius: 25px; border: none; outline: none;
+            background: #1e1e24; color: white; font-family: inherit;
+            text-align: center; font-size: 1.1rem;
+            border: 2px solid #333; transition: 0.3s;
+        }
+        #searchInput:focus { border-color: #e60303; box-shadow: 0 0 15px rgba(230, 3, 3, 0.3); }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; max-width: 1100px; margin: auto; }
+
+        .person-card { 
+            position: relative;
+            background: #151518; border: 1px solid #222; border-radius: 25px; 
+            padding: 30px 20px; text-align: center; scroll-margin-top: 100px;
+            opacity: 0; transform: translateY(50px); transition: opacity 0.6s ease-out, transform 0.6s ease-out, background 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+        .person-card.visible { opacity: 1; transform: translateY(0); }
+        .person-card:target { border-color: #e60303; box-shadow: 0 0 30px rgba(230, 3, 3, 0.3); }
+
+        .profile-img { width: 100px; height: 100px; border-radius: 50%; border: 3px solid #e60303; margin-bottom: 15px; background: #222; }
+        
+        .kurdistan-flag {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            width: 50px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .social-links { display: flex; justify-content: center; gap: 12px; margin-top: 15px; }
+        .social-links a { width: 35px; height: 35px; background: #222; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: 0.3s; }
+        .social-links .tiktok:hover { background: #000; color: #ff0050; }
+        .social-links .insta:hover { background: #e1306c; }
+        .social-links .snap:hover { background: #fffc00; color: #000; }
+
+        /* Loading Screen */
+        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #08080a; z-index: 9999; display: flex; justify-content: center; align-items: center; transition: opacity 0.5s ease-out; }
+        .loader-wrapper { position: relative; width: 80px; height: 80px; display: flex; justify-content: center; align-items: center; }
+        .spinner { position: absolute; width: 100%; height: 100%; border: 5px solid rgba(255, 255, 255, 0.1); border-top: 5px solid #e60303; border-radius: 50%; animation: spin 1s linear infinite; }
+        .loader-logo { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Back to Top Button */
+        #backToTop {
+            position: fixed; bottom: 30px; right: 30px;
+            background: #e60303; color: white; border: none;
+            width: 50px; height: 50px; border-radius: 50%;
+            font-size: 1.2rem; cursor: pointer; display: none;
+            z-index: 1000; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: 0.3s; align-items: center; justify-content: center;
+        }
+        #backToTop:hover { transform: translateY(-5px); background: #c0392b; }
+
+        /* Footer */
+        footer {
+            text-align: center; padding: 40px 20px; margin-top: 50px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1); color: #888; font-size: 0.9rem;
+        }
+        footer p { margin-bottom: 8px; }
+        footer a { color: #e60303; text-decoration: none; font-weight: bold; }
+        footer a:hover { text-decoration: underline; }
+
+        /* Mobile Style */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            header { flex-direction: column; gap: 15px; border-bottom: 1px solid #e60303; }
+            .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .person-card { padding: 15px 10px; border-radius: 15px; }
+            .profile-img { width: 70px; height: 70px; margin-bottom: 10px; }
+            h3 { font-size: 0.85rem; margin-bottom: 8px; }
+            .social-links a { width: 30px; height: 30px; font-size: 0.9rem; }
+            .kurdistan-flag { width: 25px; top: 10px; right: 10px; }
+            
+            .search-container { margin-bottom: 20px; }
+            #searchInput { width: 100%; padding: 12px; font-size: 1rem; }
+            .random-container { padding: 15px; margin-bottom: 30px; }
+            .random-btn { width: 100%; padding: 12px; font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div id="loader">
+        <div class="loader-wrapper">
+            <div class="spinner"></div>
+            <img src="https://i.ibb.co/GQqNh6RB/IMG-3244.png" class="loader-logo">
+        </div>
+    </div>
+
+    <button id="backToTop" onclick="scrollToTop()"><i class="fa-solid fa-arrow-up"></i></button>
+
+    <header>
+        <div class="logo-container">
+            <img src="https://i.ibb.co/GQqNh6RB/IMG-3244.png" class="header-logo">
+            <h1></h1>
+        </div>
+        <a href="index.html" class="back-btn">زڤڕین</a>
+    </header>
+
+    <div class="random-container">
+        <h2>کێ هەلبژێرم؟ 🎲</h2>
+        <div id="result-box">... کلیکێ بکە ...</div>
+        <button class="random-btn" onclick="pickRandom()">هەلبژێرە</button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="ل ناڤێ یاریزانی بگەرە..." onkeyup="filterCards()">
+    </div>
+
+    <div class="grid">
+        <div id="star1" class="person-card">
+            <img src="mustafa__mohamaad.jpg" class="profile-img">
+            <h3>mustafa__mohamaad</h3>
+            <div class="social-links">
+                <a href="https://www.instagram.com/mustafa__mohamaad" class="insta" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+
+        <div id="star2" class="person-card">
+            <img src="almany_13.jpg" class="profile-img">
+            <h3>almany_13</h3>
+            <div class="social-links">
+                <a href="https://www.instagram.com/almany_13" class="insta" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+
+        <div id="star3" class="person-card">
+            <img src="raad7_.jpg" class="profile-img">
+            <h3>raad7_</h3>
+            <div class="social-links">
+                <a href="https://www.instagram.com/raad7_" class="insta" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+
+        <div id="star4" class="person-card">
+            <img src="reyan.adib.jpg" class="profile-img">
+            <h3>reyan.adib</h3>
+            <div class="social-links">
+                <a href="https://www.instagram.com/reyan.adib" class="insta" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+
+        <div id="star5" class="person-card">
+            <img src="johanandpep.jpg" class="profile-img">
+            <h3>johanandpep</h3>
+            <div class="social-links">
+                <a href="https://www.instagram.com/johanandpep" class="insta" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+
+        <div id="star6" class="person-card">
+            <img src="rayan.muhammaad.jpg" class="profile-img">
+            <h3>rayan.muhammaad</h3>
+            <div class="social-links">
+                <a href="https://www.instagram.com/rayan.muhammaad" class="insta" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+
+        <div id="star7" class="person-card">
+            <img src="arkannadnan.jpg" class="profile-img">
+            <h3>arkannadnan</h3>
+            <div class="social-links">
+                <a href="https://www.instagram.com/arkannadnan" class="insta" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+
+        <div id="star8" class="person-card">
+            <img src="siraj_barca.jpg" class="profile-img">
+            <h3>siraj_barca</h3>
+            <div class="social-links">
+                <a href="https://www.instagram.com/siraj_barca" class="insta" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+
+        <div id="star9" class="person-card">
+            <img src="kaheen__fatah.jpg" class="profile-img">
+            <h3>kaheen__fatah</h3>
+            <div class="social-links">
+                <a href="https://www.instagram.com/kaheen__fatah" class="insta" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+
+        <div id="star10" class="person-card">
+            <img src="jihad.1st.jpg" class="profile-img">
+            <h3>jihad.1st</h3>
+            <div class="social-links">
+                <a href="https://www.instagram.com/jihad.1st" class="insta" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+
+        <div id="star11" class="person-card">
+            <img src="derin__salah.jpg" class="profile-img">
+            <h3>derin__salah</h3>
+            <div class="social-links">
+                <a href="https://www.instagram.com/derin__salah" class="insta" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+
+        <div id="star12" class="person-card">
+            <img src="sipandfb.jpg" class="profile-img">
+            <h3>sipandfb</h3>
+            <div class="social-links">
+                <a href="https://www.instagram.com/sipandfb" class="insta" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+
+        <div id="star13" class="person-card">
+            <img src="nikoodfb.jpg" class="profile-img">
+            <h3>nikoodfb</h3>
+            <div class="social-links">
+                <a href="https://www.instagram.com/nikoodfb" class="insta" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+
+        <div id="star14" class="person-card">
+            <img src="abdula.qizy.jpg" class="profile-img">
+            <h3>abdula.qizy</h3>
+            <div class="social-links">
+                <a href="https://www.instagram.com/abdula.qizy" class="insta" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+
+        <div id="star15" class="person-card">
+            <img src="rayanspoorts.jpg" class="profile-img">
+            <h3>rayanspoorts</h3>
+            <div class="social-links">
+                <a href="https://www.instagram.com/rayanspoorts" class="insta" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+
+        <div id="star16" class="person-card">
+            <img src="7_sarwar.jpg" class="profile-img">
+            <h3>7_sarwar</h3>
+            <div class="social-links">
+                <a href="https://www.instagram.com/7_sarwar" class="insta" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+
+        <div id="star17" class="person-card">
+            <img src="raekoita.jpg" class="profile-img">
+            <h3>raekoita</h3>
+            <div class="social-links">
+                <a href="https://www.instagram.com/raekoita" class="insta" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+                <p>گەشەپێدان ژلایێ <a href="https://www.instagram.com/iamshvan.26" target="_blank">>Shvan Jamal<</a></p>
+</p>
+    </footer>
+
+    <script>
+        function pickRandom() {
+            const stars = [
+                { name: "mustafa__mohamaad", id: "star1" },
+                { name: "almany_13", id: "star2" },
+                { name: "raad7_", id: "star3" },
+                { name: "reyan.adib", id: "star4" },
+                { name: "johanandpep", id: "star5" },
+                { name: "rayan.muhammaad", id: "star6" },
+                { name: "arkannadnan", id: "star7" },
+                { name: "siraj_barca", id: "star8" },
+                { name: "kaheen__fatah", id: "star9" },
+                { name: "jihad.1st", id: "star10" },
+                { name: "derin__salah", id: "star11" },
+                { name: "sipandfb", id: "star12" },
+                { name: "nikoodfb", id: "star13" },
+                { name: "abdula.qizy", id: "star14" },
+                { name: "rayanspoorts", id: "star15" },
+                { name: "7_sarwar", id: "star16" },
+                { name: "raekoita", id: "star17" }
+            ];
+
+            const choice = stars[Math.floor(Math.random() * stars.length)];
+            const resultBox = document.getElementById('result-box');
+            resultBox.innerHTML = `بچۆ سەر پرۆفایلی: <a href="#${choice.id}">${choice.name} ⬅️</a>`;
+
+            // Confetti Effect
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+
+        // Koda Search/Lêgerînê
+        function filterCards() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase();
+            const cards = document.querySelectorAll('.person-card');
+
+            cards.forEach(card => {
+                const name = card.querySelector('h3').innerText.toLowerCase();
+                card.style.display = name.includes(filter) ? "" : "none";
+            });
+        }
+
+        // Zêdekirina Alayê Kurdistanê
+        document.querySelectorAll('.person-card').forEach(card => {
+            const flag = document.createElement('img');
+            flag.src = "https://media.tenor.com/iP2RVrGMs-AAAAAM/kurdistanflag-kurdistan.gif";
+            flag.className = "kurdistan-flag";
+            card.appendChild(flag);
+        });
+
+        // Scroll Animation Observer
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.person-card').forEach(card => observer.observe(card));
+
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('loader');
+            setTimeout(() => {
+                loader.style.opacity = '0';
+                setTimeout(() => { loader.style.display = 'none'; }, 500);
+            }, 4000);
+        });
+
+        // Back to Top Logic
+        const backBtn = document.getElementById('backToTop');
+        window.onscroll = function() {
+            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+                backBtn.style.display = "flex";
+            } else {
+                backBtn.style.display = "none";
+            }
+        };
+        function scrollToTop() { window.scrollTo({top: 0, behavior: 'smooth'}); }
+
+        // Rêgirtin li Right Click
+        document.addEventListener('contextmenu', event => event.preventDefault());
+    </script>
+</body>
+</html>
