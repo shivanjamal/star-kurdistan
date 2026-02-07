@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پەیوەندی - Contact Us</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        @font-face {
+            font-family: 'NRT';
+            src: url('https://cdn.jsdelivr.net/gh/sarchia/kurdish-fonts/NRT/NRT-Reg.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'NRT';
+            src: url('https://cdn.jsdelivr.net/gh/sarchia/kurdish-fonts/NRT/NRT-Bold.ttf') format('truetype');
+            font-weight: bold;
+            font-style: normal;
+        }
+        
+        :root {
+            --bg-primary: #050510;
+            --bg-secondary: #0a0a15;
+            --accent: #00f2ff;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --card-bg: rgba(20, 30, 50, 0.4);
+            --border: rgba(0, 242, 255, 0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'NRT', sans-serif; 
+            background-color: var(--bg-primary);
+            background-image: radial-gradient(circle at top center, rgba(0, 242, 255, 0.15), transparent 70%);
+            color: var(--text-main);
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        header { 
+            width: 100%; max-width: 800px; margin-bottom: 40px; display: flex; 
+            justify-content: space-between; align-items: center; 
+            border-bottom: 1px solid var(--border); padding: 20px; 
+            background: rgba(5, 5, 16, 0.85); backdrop-filter: blur(20px);
+            border-radius: 0 0 20px 20px;
+        }
+        
+        .logo-container { display: flex; align-items: center; gap: 15px; }
+        .header-logo { width: 40px; height: 40px; border-radius: 50%; }
+
+        .contact-container {
+            width: 90%; max-width: 600px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 40px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        h1 { margin-bottom: 10px; font-size: 2rem; color: var(--text-main); text-align: center; }
+        p { text-align: center; color: var(--text-muted); margin-bottom: 30px; }
+
+        .form-group { margin-bottom: 20px; text-align: right; }
+        label { display: block; margin-bottom: 8px; color: var(--text-main); font-weight: bold; }
+        
+        input, textarea {
+            width: 100%; padding: 15px;
+            background: rgba(0, 0, 0, 0.2); color: white;
+            border: 1px solid var(--border); border-radius: 12px;
+            font-family: inherit; font-size: 1rem; outline: none; transition: 0.3s;
+        }
+        input:focus, textarea:focus { border-color: var(--accent); background: rgba(0,0,0,0.4); }
+        textarea { resize: vertical; min-height: 120px; }
+
+        .submit-btn {
+            width: 100%; padding: 15px;
+            background: var(--accent); color: #000; border: none; border-radius: 12px;
+            font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.3s;
+            display: flex; justify-content: center; align-items: center; gap: 10px;
+        }
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0, 242, 255, 0.3); }
+        .submit-btn.loading { opacity: 0.7; cursor: not-allowed; pointer-events: none; }
+        
+        .btn-spinner {
+            width: 20px; height: 20px; border: 3px solid rgba(0,0,0,0.1); border-top-color: #000; border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+        .submit-btn.loading .btn-spinner { display: block; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .back-btn {
+            text-decoration: none; color: var(--text-main); background: rgba(255,255,255,0.1);
+            padding: 8px 20px; border-radius: 20px; transition: 0.3s;
+        }
+        .back-btn:hover { background: rgba(255,255,255,0.2); }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            display: none; justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 0.3s ease; z-index: 1000;
+        }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-box {
+            background: var(--bg-secondary); border: 1px solid var(--border);
+            padding: 40px; border-radius: 25px; text-align: center;
+            max-width: 400px; width: 90%;
+            transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .modal-overlay.active .modal-box { transform: scale(1); }
+        
+        .modal-title { font-size: 1.5rem; margin-bottom: 10px; color: var(--text-main); }
+        .modal-text { color: var(--text-muted); margin-bottom: 25px; line-height: 1.6; }
+        .modal-close-btn {
+            background: transparent; color: var(--accent);
+            border: 1px solid var(--accent); padding: 10px 30px; border-radius: 20px;
+            font-weight: bold; cursor: pointer; transition: 0.3s;
+        }
+        .modal-close-btn:hover { background: var(--accent); color: black; }
+
+        /* Light Mode */
+        body.light-mode { background-color: #f1f5f9; color: #1e293b; }
+        body.light-mode .contact-container { background: rgba(255,255,255,0.8); border-color: rgba(0,0,0,0.1); }
+        body.light-mode h1, body.light-mode label { color: #0f172a; }
+        body.light-mode p { color: #64748b; }
+        body.light-mode input, body.light-mode textarea { background: rgba(255,255,255,0.5); color: #0f172a; border-color: #cbd5e1; }
+        body.light-mode .modal-box { background: #fff; color: #0f172a; }
+        
+        .theme-toggle {
+            background: transparent; border: 1px solid var(--border);
+            color: var(--text-main); width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.3s;
+        }
+        body.light-mode .theme-toggle { background: rgba(0,0,0,0.05); color: #0f172a; border-color: rgba(0,0,0,0.1); }
+        
+        .footer-socials { margin-top: 30px; display: flex; gap: 15px; justify-content: center; }
+        .social-icon { color: var(--text-muted); font-size: 1.5rem; transition: 0.3s; }
+        .social-icon:hover { color: var(--accent); transform: translateY(-3px); }
+
+        /* Breaking News Ticker */
+        .news-ticker {
+            width: 100%;
+            background: rgba(0, 10, 20, 0.95);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            height: 40px;
+            position: sticky;
+            top: 0;
+            z-index: 1001;
+            overflow: hidden;
+        }
+        .ticker-label {
+            background: var(--accent);
+            color: rgb(0, 0, 0);
+            padding: 0 15px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            z-index: 2;
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.5);
+            white-space: nowrap;
+        }
+        .ticker-text-wrapper {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+        .ticker-text {
+            white-space: nowrap;
+            animation: scrollText 15s linear infinite;
+            color: #e0e0e0;
+            font-size: 0.9rem;
+            display: inline-block;
+        }
+        .ticker-text a {
+            color: #e0e0e0;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .ticker-text a:hover {
+            color: var(--accent);
+            text-decoration: underline;
+        }
+        .news-ticker:hover .ticker-text {
+            animation-play-state: paused;
+        }
+        @keyframes scrollText {
+            0% { transform: translateX(100vw); }
+            100% { transform: translateX(-100%); }
+        }
+    </style>
+</head>
+<body>
+    <div class="news-ticker">
+        <div class="ticker-label">بخینە</div>
+        <div class="ticker-text-wrapper">
+            <div class="ticker-text"></div>
+        </div>
+    </div>
+
+    <header>
+        <div class="logo-container">
+            <img src="https://i.ibb.co/GQqNh6RB/IMG-3244.png" class="header-logo">
+            <span style="font-weight: bold; font-size: 1.2rem;">پەیوەندی</span>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <a href="index.html" class="back-btn">زڤڕین</a>
+        </div>
+    </header>
+ 
+    <div class="contact-container">
+        <h1>پەیوەندی</h1>
+        <p>پرسیار یان پێشنیارەک تە هەیە؟ نامەیەکێ بۆ مە بنێرە.</p>
+        
+        <form id="contactForm">
+            <form
+              action="https://formspree.io/f/xdaloavn"
+               method="POST"
+            >
+            <div class="form-group">
+                <label>ناڤ</label>
+                <input type="text" id="name" placeholder="ناڤێ خۆ بنڤیسە" required>
+            </div>
+            <div class="form-group">
+                <label>ئیمەیڵ</label>
+                <input type="email" id="email" placeholder="example@gmail.com" required>
+            </div>
+            <div class="form-group">
+                <label>نامە</label>
+                <textarea id="message" placeholder="ناما خۆ بنڤیسە..." required></textarea>
+            </div>
+            <button type="submit" class="submit-btn">
+                <span class="btn-text">ناردن</span>
+                <div class="btn-spinner"></div>
+            </button>
+        </form>
+
+        <div class="footer-socials">
+            <a href="https://www.instagram.com/iamshvan.26/" class="social-icon"><i class="fa-brands fa-instagram"></i></a>
+            <a href="https://www.tiktok.com/@iamshvan" class="social-icon"><i class="fa-brands fa-tiktok"></i></a>
+            <a href="https://snapchat.com/t/tYrLam63" class="social-icon"><i class="fa-brands fa-snapchat"></i></a>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="thankYouModal">
+        <div class="modal-box">
+            <h2 class="modal-title">سوپاس!</h2>
+            <p class="modal-text">نامەکەت ب سەرکەفتیانە گەیشت. ئەم دێ ب زووترین دەم بەرسڤا تە دەین.<br><br>Your message has been sent successfully.</p>
+            <button class="modal-close-btn" onclick="closeModal()">باشە (OK)</button>
+        </div>
+    <script src="news.js"></script>
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const message = document.getElementById('message').value.trim();
+            const btn = document.querySelector('.submit-btn');
+            const btnText = btn.querySelector('.btn-text');
+
+            if (!name || !email || !message) {
+                alert("تکایە هەمی خانەکان پڕبکەوە!\nPlease fill in all fields.");
+                return;
+            }
+
+            // Start Loading
+            btn.classList.add('loading');
+            const originalText = btnText.innerText;
+            btnText.innerText = "جارێ ڕاوەستە...";
+
+            setTimeout(() => {
+                document.getElementById('thankYouModal').classList.add('active');
+                this.reset();
+                btn.classList.remove('loading');
+                btnText.innerText = originalText;
+            }, 2000);
+        });
+
+        function closeModal() {
+            document.getElementById('thankYouModal').classList.remove('active');
+        }
+        // Close modal when clicking outside
+        document.getElementById('thankYouModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // Theme Toggle Logic
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            const icon = document.querySelector('.theme-toggle i');
+            if (document.body.classList.contains('light-mode')) {
+                icon.classList.replace('fa-moon', 'fa-sun');
+                localStorage.setItem('theme', 'light');
+            } else {
+                icon.classList.replace('fa-sun', 'fa-moon');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        // Load Theme
+        if (localStorage.getItem('theme') === 'light') toggleTheme();
+    </script>
+</body>
+</html>
