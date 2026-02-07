@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>پەیوەندی - Contact Us</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
     <style>
         @font-face {
             font-family: 'NRT';
@@ -87,14 +86,14 @@
             display: flex; justify-content: center; align-items: center; gap: 10px;
         }
         .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0, 242, 255, 0.3); }
-        .submit-btn.loading { opacity: 0.7; cursor: not-allowed; pointer-events: none; }
+        .submit-btn:disabled { opacity: 0.7; cursor: not-allowed; }
         
         .btn-spinner {
             width: 20px; height: 20px; border: 3px solid rgba(0,0,0,0.1); border-top-color: #000; border-radius: 50%;
             animation: spin 1s linear infinite;
             display: none;
         }
-        .submit-btn.loading .btn-spinner { display: block; }
+        .loading .btn-spinner { display: block; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
         .back-btn {
@@ -108,16 +107,16 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
             display: none; justify-content: center; align-items: center;
-            opacity: 0; transition: opacity 0.3s ease; z-index: 1000;
+            z-index: 1000;
         }
-        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-overlay.active { display: flex; }
         .modal-box {
             background: var(--bg-secondary); border: 1px solid var(--border);
             padding: 40px; border-radius: 25px; text-align: center;
             max-width: 400px; width: 90%;
-            transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .modal-overlay.active .modal-box { transform: scale(1); }
+        @keyframes modalPop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         
         .modal-title { font-size: 1.5rem; margin-bottom: 10px; color: var(--text-main); }
         .modal-text { color: var(--text-muted); margin-bottom: 25px; line-height: 1.6; }
@@ -128,82 +127,30 @@
         }
         .modal-close-btn:hover { background: var(--accent); color: black; }
 
-        /* Light Mode */
-        body.light-mode { background-color: #f1f5f9; color: #1e293b; }
-        body.light-mode .contact-container { background: rgba(255,255,255,0.8); border-color: rgba(0,0,0,0.1); }
-        body.light-mode h1, body.light-mode label { color: #0f172a; }
-        body.light-mode p { color: #64748b; }
-        body.light-mode input, body.light-mode textarea { background: rgba(255,255,255,0.5); color: #0f172a; border-color: #cbd5e1; }
-        body.light-mode .modal-box { background: #fff; color: #0f172a; }
-        
-        .theme-toggle {
-            background: transparent; border: 1px solid var(--border);
-            color: var(--text-main); width: 40px; height: 40px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: 0.3s;
-        }
-        body.light-mode .theme-toggle { background: rgba(0,0,0,0.05); color: #0f172a; border-color: rgba(0,0,0,0.1); }
-        
         .footer-socials { margin-top: 30px; display: flex; gap: 15px; justify-content: center; }
         .social-icon { color: var(--text-muted); font-size: 1.5rem; transition: 0.3s; }
         .social-icon:hover { color: var(--accent); transform: translateY(-3px); }
 
-        /* Breaking News Ticker */
+        /* News Ticker */
         .news-ticker {
-            width: 100%;
-            background: rgba(0, 10, 20, 0.95);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            height: 40px;
-            position: sticky;
-            top: 0;
-            z-index: 1001;
-            overflow: hidden;
+            width: 100%; background: rgba(0, 10, 20, 0.95);
+            border-bottom: 1px solid var(--border); display: flex;
+            align-items: center; height: 40px; position: sticky; top: 0;
+            z-index: 1001; overflow: hidden;
         }
         .ticker-label {
-            background: var(--accent);
-            color: rgb(0, 0, 0);
-            padding: 0 15px;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            font-weight: bold;
-            font-size: 0.9rem;
-            z-index: 2;
-            box-shadow: 0 0 15px rgba(0, 242, 255, 0.5);
-            white-space: nowrap;
+            background: var(--accent); color: #000; padding: 0 15px;
+            height: 100%; display: flex; align-items: center;
+            font-weight: bold; font-size: 0.9rem; z-index: 2;
         }
-        .ticker-text-wrapper {
-            flex: 1;
-            overflow: hidden;
-            position: relative;
-            height: 100%;
-            display: flex;
-            align-items: center;
-        }
+        .ticker-text-wrapper { flex: 1; overflow: hidden; position: relative; }
         .ticker-text {
-            white-space: nowrap;
-            animation: scrollText 15s linear infinite;
-            color: #e0e0e0;
-            font-size: 0.9rem;
-            display: inline-block;
-        }
-        .ticker-text a {
-            color: #e0e0e0;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-        .ticker-text a:hover {
-            color: var(--accent);
-            text-decoration: underline;
-        }
-        .news-ticker:hover .ticker-text {
-            animation-play-state: paused;
+            white-space: nowrap; animation: scrollText 15s linear infinite;
+            color: #e0e0e0; font-size: 0.9rem; padding-right: 100%;
         }
         @keyframes scrollText {
-            0% { transform: translateX(100vw); }
-            100% { transform: translateX(-100%); }
+            from { transform: translateX(100%); }
+            to { transform: translateX(-100%); }
         }
     </style>
 </head>
@@ -211,13 +158,13 @@
     <div class="news-ticker">
         <div class="ticker-label">بخینە</div>
         <div class="ticker-text-wrapper">
-            <div class="ticker-text"></div>
+            <div class="ticker-text">ب خێرهاتی بۆ لاپەرێ پەیوەندیێ... هەر پرسیارەک هەبیت دشێی ل فێرە بنڤیسی.</div>
         </div>
     </div>
 
     <header>
         <div class="logo-container">
-            <img src="https://i.ibb.co/GQqNh6RB/IMG-3244.png" class="header-logo">
+            <img src="https://i.ibb.co/GQqNh6RB/IMG-3244.png" class="header-logo" alt="Logo">
             <span style="font-weight: bold; font-size: 1.2rem;">پەیوەندی</span>
         </div>
         <div style="display: flex; gap: 10px; align-items: center;">
@@ -229,24 +176,21 @@
         <h1>پەیوەندی</h1>
         <p>پرسیار یان پێشنیارەک تە هەیە؟ نامەیەکێ بۆ مە بنێرە.</p>
         
-        <form id="contactForm">
-            <form
-              action="https://formspree.io/f/xdaloavn"
-               method="POST"
-            >
+        <!-- Formspree Integration -->
+        <form id="contactForm" action="https://formspree.io/f/xdaloavn" method="POST">
             <div class="form-group">
-                <label>ناڤ</label>
-                <input type="text" id="name" placeholder="ناڤێ خۆ بنڤیسە" required>
+                <label for="full-name">ناڤ</label>
+                <input type="text" name="name" id="full-name" placeholder="ناڤێ خۆ بنڤیسە" required>
             </div>
             <div class="form-group">
-                <label>ئیمەیڵ</label>
-                <input type="email" id="email" placeholder="example@gmail.com" required>
+                <label for="email-address">ئیمەیڵ</label>
+                <input type="email" name="email" id="email-address" placeholder="example@gmail.com" required>
             </div>
             <div class="form-group">
-                <label>نامە</label>
-                <textarea id="message" placeholder="ناما خۆ بنڤیسە..." required></textarea>
+                <label for="message-body">نامە</label>
+                <textarea name="message" id="message-body" placeholder="ناما خۆ بنڤیسە..." required></textarea>
             </div>
-            <button type="submit" class="submit-btn">
+            <button type="submit" class="submit-btn" id="submitBtn">
                 <span class="btn-text">ناردن</span>
                 <div class="btn-spinner"></div>
             </button>
@@ -259,63 +203,74 @@
         </div>
     </div>
 
+    <!-- Success Modal -->
     <div class="modal-overlay" id="thankYouModal">
         <div class="modal-box">
             <h2 class="modal-title">سوپاس!</h2>
             <p class="modal-text">نامەکەت ب سەرکەفتیانە گەیشت. ئەم دێ ب زووترین دەم بەرسڤا تە دەین.<br><br>Your message has been sent successfully.</p>
             <button class="modal-close-btn" onclick="closeModal()">باشە (OK)</button>
         </div>
-    <script src="news.js"></script>
+    </div>
+
     <script>
-        document.getElementById('contactForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        const contactForm = document.getElementById('contactForm');
+        const thankYouModal = document.getElementById('thankYouModal');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = submitBtn.querySelector('.btn-text');
 
-            const name = document.getElementById('name').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const message = document.getElementById('message').value.trim();
-            const btn = document.querySelector('.submit-btn');
-            const btnText = btn.querySelector('.btn-text');
+        contactForm.addEventListener('submit', async function(e) {
+            e.preventDefault(); // Prevent normal redirect
 
-            if (!name || !email || !message) {
-                alert("تکایە هەمی خانەکان پڕبکەوە!\nPlease fill in all fields.");
-                return;
-            }
-
-            // Start Loading
-            btn.classList.add('loading');
-            const originalText = btnText.innerText;
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.classList.add('loading');
+            const originalBtnText = btnText.innerText;
             btnText.innerText = "جارێ ڕاوەستە...";
 
-            setTimeout(() => {
-                document.getElementById('thankYouModal').classList.add('active');
-                this.reset();
-                btn.classList.remove('loading');
-                btnText.innerText = originalText;
-            }, 2000);
+            // Get form data
+            const formData = new FormData(contactForm);
+
+            try {
+                const response = await fetch(contactForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    // Success
+                    thankYouModal.classList.add('active');
+                    contactForm.reset();
+                } else {
+                    // Error from Formspree
+                    const data = await response.json();
+                    if (data.errors) {
+                        alert(data.errors.map(error => error.message).join(", "));
+                    } else {
+                        alert("خەلەتەک هەبوو، دووبارە تاقی بکەرەوە.");
+                    }
+                }
+            } catch (error) {
+                alert("پەیوەندی ب ئینتەرنێتێ نینە یان کێشەیەک هەیە.");
+            } finally {
+                // Reset button state
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('loading');
+                btnText.innerText = originalBtnText;
+            }
         });
 
         function closeModal() {
-            document.getElementById('thankYouModal').classList.remove('active');
+            thankYouModal.classList.remove('active');
         }
+
         // Close modal when clicking outside
-        document.getElementById('thankYouModal').addEventListener('click', function(e) {
+        thankYouModal.addEventListener('click', function(e) {
             if (e.target === this) closeModal();
         });
-
-        // Theme Toggle Logic
-        function toggleTheme() {
-            document.body.classList.toggle('light-mode');
-            const icon = document.querySelector('.theme-toggle i');
-            if (document.body.classList.contains('light-mode')) {
-                icon.classList.replace('fa-moon', 'fa-sun');
-                localStorage.setItem('theme', 'light');
-            } else {
-                icon.classList.replace('fa-sun', 'fa-moon');
-                localStorage.setItem('theme', 'dark');
-            }
-        }
-        // Load Theme
-        if (localStorage.getItem('theme') === 'light') toggleTheme();
     </script>
 </body>
 </html>
+
